@@ -11,8 +11,8 @@ const app = express();
 app.use(express.json());
 app.use(requestIdHandler as express.RequestHandler);
 
-
 app.use('/', router);
+
 app.use(errorHandler);
 
 const start = async () => {

@@ -14,8 +14,8 @@ class CardController {
       }
       const user = await Card.create({ name, link, owner });
       return res.json({ data: user });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -23,8 +23,8 @@ class CardController {
     try {
       const cards = await Card.find({});
       return res.json({ data: cards });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -32,14 +32,15 @@ class CardController {
     const { cardId } = req.params;
 
     try {
-      let card = await Card.findById(cardId);
-      if (!card) {
-        return next(ApiError.authorization('Карточка с указанным _id не найдена'));
-      }
-      card = await Card.findByIdAndRemove(cardId);
-      return res.json({ data: card });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+      await Card.findByIdAndRemove(cardId)
+        .then((card) => {
+          if (!card) {
+            return next(ApiError.authorization('Карточка с указанным _id не найдена'));
+          }
+          return res.json({ data: card });
+        });
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -67,8 +68,8 @@ class CardController {
         return next(ApiError.authorization('Передан несуществующий _id карточки'));
       }
       return res.json({ data: card });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -96,8 +97,8 @@ class CardController {
         return next(ApiError.authorization('Передан несуществующий _id карточки'));
       }
       return res.json({ data: card });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 }
