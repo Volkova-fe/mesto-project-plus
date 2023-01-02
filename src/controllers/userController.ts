@@ -12,8 +12,8 @@ class UserController {
       }
       const user = await User.create({ name, about, avatar });
       return res.json({ data: user });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -21,8 +21,8 @@ class UserController {
     try {
       const users = await User.find({});
       return res.json({ data: users });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -34,8 +34,8 @@ class UserController {
         return next(ApiError.authorization('Пользователь по указанному _id не найден'));
       }
       return res.json({ data: users });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -62,8 +62,8 @@ class UserController {
         return next(ApiError.authorization('Пользователь по указанному _id не найден'));
       }
       return res.json({ data: users });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 
@@ -88,8 +88,8 @@ class UserController {
         return next(ApiError.authorization('Пользователь по указанному _id не найден'));
       }
       return res.json({ data: users });
-    } catch (err: any) {
-      next(ApiError.internal(err.message));
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
     }
   }
 }

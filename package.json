@@ -1,5 +1,5 @@
 {
-  "name": "VolkovaFe",
+  "name": "volkova",
   "version": "1.0.0",
   "description": "backend Mesto express+mongo",
   "main": "dist/app.js",
