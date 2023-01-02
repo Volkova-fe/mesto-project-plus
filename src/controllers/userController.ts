@@ -26,5 +26,18 @@ class UserController {
       next(ApiError.internal(err.message));
     }
   }
+
+  async getUserById(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    try {
+      const users = await User.findById(id);
+      if (!users) {
+        return next(ApiError.authorization('Пользователь по указанному _id не найден'))
+      }
+      return res.json({ data: users });
+    } catch (err: any) {
+      next(ApiError.internal(err.message));
+    }
+  }
 }
 export default new UserController();
