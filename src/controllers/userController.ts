@@ -17,5 +17,14 @@ class UserController {
       next(ApiError.internal(err.message));
     }
   }
+
+  async getAllUsers(req: Request, res: Response, next: NextFunction) {
+    try {
+      const users = await User.find({});
+      return res.json({ data: users });
+    } catch (err: any) {
+      next(ApiError.internal(err.message));
+    }
+  }
 }
 export default new UserController();
