@@ -39,5 +39,39 @@ class UserController {
       next(ApiError.internal(err.message));
     }
   }
+
+  async updateInfo(req: any, res: Response, next: NextFunction) {
+    const { name, about } = req.body;
+    const id = req.user!._id
+    try {
+      if (!name || !about) {
+        return next(ApiError.badRequest('Переданы некорректные данные при обновлении профиля'))
+      }
+      const users = await User.findByIdAndUpdate(id, { name, about }, { new: true, runValidators: true });
+      if (!users) {
+        return next(ApiError.authorization('Пользователь по указанному _id не найден'))
+      }
+      return res.json({ data: users });
+    } catch (err: any) {
+      next(ApiError.internal(err.message));
+    }
+  }
+
+  async updateAvatar(req: any, res: Response, next: NextFunction) {
+    const { avatar } = req.body;
+    const id = req.user!._id
+    try {
+      if (!avatar) {
+        return next(ApiError.badRequest('Переданы некорректные данные при обновлении аватара'))
+      }
+      const users = await User.findByIdAndUpdate(id, { avatar }, { new: true, runValidators: true });
+      if (!users) {
+        return next(ApiError.authorization('Пользователь по указанному _id не найден'))
+      }
+      return res.json({ data: users });
+    } catch (err: any) {
+      next(ApiError.internal(err.message));
+    }
+  }
 }
 export default new UserController();
