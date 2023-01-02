@@ -1,4 +1,4 @@
-import { model, Schema, PopulatedDoc, Types } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 
 interface ICard {
   name: string;
@@ -13,11 +13,23 @@ const CardSchema = new Schema<ICard>({
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: true
+    required: true,
+    validate: {
+      validator: (v: string) => {
+        return v.length > 2 && v.length < 30
+      },
+      message: 'Текст должен быть не короче 2 симв. и не длиннее 30',
+    },
   },
   link: {
     type: String,
-    required: true
+    required: true,
+    validate: {
+      validator: (v: string) => {
+        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/
+      },
+      message: 'Некорректная ссылка',
+    },
   },
   owner: {
     type: Schema.Types.ObjectId,
