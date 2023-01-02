@@ -1,10 +1,13 @@
 import { model, Schema } from 'mongoose';
 import { regExp } from '../constants/index';
+import validator from 'validator';
 
 interface IUser {
   name: string;
   about: string;
   avatar: string;
+  email: string;
+  password: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -12,7 +15,6 @@ const UserSchema = new Schema<IUser>({
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: [true, 'User name required'],
     validate: {
       validator: (v: string) => v.length > 2 && v.length < 30,
       message: 'Текст должен быть не короче 2 симв. и не длиннее 30',
@@ -22,7 +24,6 @@ const UserSchema = new Schema<IUser>({
     type: String,
     minlength: 2,
     maxlength: 200,
-    required: [true, 'User about required'],
     validate: {
       validator: (v: string) => v.length > 2 && v.length < 200,
       message: 'Текст должен быть не короче 2 симв. и не длиннее 200',
@@ -30,11 +31,23 @@ const UserSchema = new Schema<IUser>({
   },
   avatar: {
     type: String,
-    required: [true, 'User avatar required'],
     validate: {
       validator: (v: string) => regExp.test(v),
       message: 'Некорректная ссылка',
     },
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: [true, 'User email equired'],
+    validate: {
+      validator: (v: string) => validator.isEmail(v),
+      message: 'Неправильный формат почты',
+    },
+  },
+  password: {
+    type: String,
+    required: [true, 'User password required'],
   },
 });
 export default model<IUser>('User', UserSchema);
