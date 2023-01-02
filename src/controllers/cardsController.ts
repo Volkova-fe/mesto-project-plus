@@ -1,17 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import ApiError from '../error/ApiError';
-import Card from "../models/card";
+import Card from '../models/card';
 import { IAppRequest } from '../types/AppRequest';
 
 class CardController {
-
   async createCard(req: IAppRequest, res: Response, next: NextFunction) {
     const { name, link } = req.body;
     const owner = req.user!._id;
 
     try {
       if (!name || !link) {
-        return next(ApiError.badRequest('Переданы некорректные данные при создании карточки'))
+        return next(ApiError.badRequest('Переданы некорректные данные при создании карточки'));
       }
       const user = await Card.create({ name, link, owner });
       return res.json({ data: user });
@@ -35,7 +34,7 @@ class CardController {
     try {
       let card = await Card.findById(cardId);
       if (!card) {
-        return next(ApiError.authorization('Карточка с указанным _id не найдена'))
+        return next(ApiError.authorization('Карточка с указанным _id не найдена'));
       }
       card = await Card.findByIdAndRemove(cardId);
       return res.json({ data: card });
@@ -50,11 +49,22 @@ class CardController {
 
     try {
       if (!cardId) {
-        return next(ApiError.badRequest('Переданы некорректные данные для постановки лайка'))
+        return next(ApiError.badRequest('Переданы некорректные данные для постановки лайка'));
       }
-      const card = await Card.findByIdAndUpdate(cardId, { $addToSet: { likes: id } }, { new: true, runValidators: true });;
+      const card = await Card.findByIdAndUpdate(
+        cardId,
+        {
+          $addToSet: {
+            likes: id,
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
       if (!card) {
-        return next(ApiError.authorization('Передан несуществующий _id карточки'))
+        return next(ApiError.authorization('Передан несуществующий _id карточки'));
       }
       return res.json({ data: card });
     } catch (err: any) {
@@ -68,11 +78,22 @@ class CardController {
 
     try {
       if (!cardId) {
-        return next(ApiError.badRequest('Переданы некорректные данные для постановки лайка'))
+        return next(ApiError.badRequest('Переданы некорректные данные для постановки лайка'));
       }
-      const card = await Card.findByIdAndUpdate(cardId,  { $pull: { likes: id } }, { new: true, runValidators: true });;
+      const card = await Card.findByIdAndUpdate(
+        cardId,
+        {
+          $pull: {
+            likes: id,
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
       if (!card) {
-        return next(ApiError.authorization('Передан несуществующий _id карточки'))
+        return next(ApiError.authorization('Передан несуществующий _id карточки'));
       }
       return res.json({ data: card });
     } catch (err: any) {

@@ -1,4 +1,5 @@
 import { model, Schema, Types } from 'mongoose';
+import { regExp } from '../constants/index';
 
 interface ICard {
   name: string;
@@ -15,9 +16,7 @@ const CardSchema = new Schema<ICard>({
     maxlength: 30,
     required: true,
     validate: {
-      validator: (v: string) => {
-        return v.length > 2 && v.length < 30
-      },
+      validator: (v: string) => v.length > 2 && v.length < 30,
       message: 'Текст должен быть не короче 2 симв. и не длиннее 30',
     },
   },
@@ -25,25 +24,23 @@ const CardSchema = new Schema<ICard>({
     type: String,
     required: true,
     validate: {
-      validator: (v: string) => {
-        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/
-      },
+      validator: (v: string) => regExp.test(v),
       message: 'Некорректная ссылка',
     },
   },
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'user',
-    required: true
+    required: true,
   },
   likes: {
     type: [Types.ObjectId],
-    default:[],
-    required: true
+    default: [],
+    required: true,
   },
   createdAt: {
     type: Date,
-		default: Date.now
-  }
+    default: Date.now,
+  },
 });
 export default model<ICard>('Card', CardSchema);
