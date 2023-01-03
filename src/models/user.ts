@@ -1,8 +1,10 @@
-import { model, Schema, Model, Document, Types } from 'mongoose';
-import { regExp } from '../constants/index';
+import {
+  model, Schema, Model, Document,
+} from 'mongoose';
 import validator from 'validator';
-import ApiError from '../error/ApiError';
 import bcrypt from 'bcrypt';
+import { regExp } from '../constants/index';
+import ApiError from '../error/ApiError';
 
 interface IUser {
   name: string;
@@ -13,6 +15,7 @@ interface IUser {
 }
 
 interface UserModel extends Model<IUser> {
+  // eslint-disable-next-line no-unused-vars
   findUserByCredentials: (email: string, password: string) => Promise<Document<any, any, IUser>>
 }
 
@@ -54,18 +57,18 @@ const UserSchema = new Schema<IUser>({
   password: {
     type: String,
     required: [true, 'User password required'],
-    select: false
+    select: false,
   },
 });
 
-UserSchema.static('findUserByCredentials', async function findUserByCredentials (email, password) {
+UserSchema.static('findUserByCredentials', async function findUserByCredentials(email, password) {
   const user = await this.findOne({ email }).select('+password');
   if (!user) {
     return ApiError.authorization('Неправильные почта или пароль');
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return ApiError.authorization('Неправильные почта или пароль')
+    return ApiError.authorization('Неправильные почта или пароль');
   }
   return user;
 });

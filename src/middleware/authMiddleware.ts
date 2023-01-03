@@ -6,9 +6,7 @@ interface IAuthRequest extends Request {
   user?: string | JwtPayload
 }
 
-const extractBearerToken = (header: string) => {
-  return header.replace('Bearer ', '');
-};
+const extractBearerToken = (header: string) => header.replace('Bearer ', '');
 
 export default (req: IAuthRequest, _res: Response, next: NextFunction) => {
   const { authorization } = req.headers;

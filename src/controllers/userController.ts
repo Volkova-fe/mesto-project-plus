@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import User from '../models/user';
-import ApiError from '../error/ApiError';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import User from '../models/user';
+import ApiError from '../error/ApiError';
 import { IAppRequest } from '../types/AppRequest';
 
 class UserController {
@@ -12,7 +12,7 @@ class UserController {
       about = 'Исследователь',
       avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
       email,
-      password
+      password,
     } = req.body;
 
     try {
@@ -21,17 +21,13 @@ class UserController {
       }
       const candidate = await User.findOne({ email });
       if (candidate) {
-        return next(ApiError.badRequest('Пользователь с переданным email уже существует'))
+        return next(ApiError.badRequest('Пользователь с переданным email уже существует'));
       }
-      const hashPassword = await bcrypt.hash(password, 10)
-      const user = await User.create({ name, about, avatar, email, password: hashPassword });
-      return res.json({
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
+      const hashPassword = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        name, about, avatar, email, password: hashPassword,
       });
+      return res.send({ data: user });
     } catch {
       next(ApiError.internal('На сервере произошла ошибка'));
     }
@@ -60,9 +56,9 @@ class UserController {
   }
 
   async getUserInfo(req: IAppRequest, res: Response, next: NextFunction) {
-    const id = req.user?._id;
+    const userId = req.user!._id;
     try {
-      const user = await User.findById(id);
+      const user = await User.findById(userId);
       if (!user) {
         return next(ApiError.authorization('Пользователь по указанному _id не найден'));
       }
@@ -72,12 +68,16 @@ class UserController {
     }
   }
 
-  async login(req: IAppRequest, res: Response, _next: NextFunction) {
-    const { email, password } = req.body
-    const user = await User.findUserByCredentials(email, password);
-    return res.send({
-      token: jwt.sign({ _id: user._id }, process.env.SECRET_KEY as string, { expiresIn: '7d' }),
-    });
+  async login(req: IAppRequest, res: Response, next: NextFunction) {
+    const { email, password } = req.body;
+    try {
+      const user = await User.findUserByCredentials(email, password);
+      return res.send({
+        token: jwt.sign({ _id: user._id }, process.env.SECRET_KEY as string, { expiresIn: '7d' }),
+      });
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
+    }
   }
 
   async updateInfo(req: any, res: Response, next: NextFunction) {
