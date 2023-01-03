@@ -1,30 +1,46 @@
-require('dotenv').config()
-import express, { NextFunction, Request } from 'express';
+/* eslint-disable no-console */
+import express from 'express';
 import mongoose from 'mongoose';
+import { errors } from 'celebrate';
 import router from './routes/index';
 import errorHandler from './middleware/ErrorHandlingMiddleware';
-import { requestIdHandler } from './types/AppRequest';
+import userController from './controllers/userController';
+import authMiddleware from './middleware/authMiddleware';
+import { createUserValidation, loginValidation } from './validation/userValidation';
+import { requestLogger } from './middleware/logger';
+import { errorLogger } from './middleware/errorLogger';
 
-const PORT = process.env.PORT || 5003
+require('dotenv').config();
+
+const PORT = process.env.PORT || 5003;
 
 const app = express();
 app.use(express.json());
-app.use(requestIdHandler as express.RequestHandler);
+app.use(express.urlencoded({ extended: true }));
+
+app.use(requestLogger);
+
+app.post('/signin', loginValidation, userController.login);
+app.post('/signup', createUserValidation, userController.createUser);
+app.use(authMiddleware);
 
 app.use('/', router);
 
+app.use(errorLogger);
+app.use(errors());
 app.use(errorHandler);
 
 const start = async () => {
   try {
     await mongoose.connect(`${process.env.DB_URL}`);
 
-    app.listen(PORT,
-      () => console.log(`Server start ${PORT}`)
-    )
+    app.listen(
+      PORT,
+      () => console.log(`Server start ${PORT}`),
+    );
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
-}
+};
 
-start()
+start();

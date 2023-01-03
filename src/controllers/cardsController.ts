@@ -30,12 +30,16 @@ class CardController {
 
   async removeCard(req: IAppRequest, res: Response, next: NextFunction) {
     const { cardId } = req.params;
+    const owner = req.user!._id;
 
     try {
       await Card.findByIdAndRemove(cardId)
         .then((card) => {
           if (!card) {
             return next(ApiError.authorization('Карточка с указанным _id не найдена'));
+          }
+          if (card.owner.toString() !== owner) {
+            return next(ApiError.authorization('Недостаточно прав для удаления карточки'));
           }
           return res.json({ data: card });
         });
