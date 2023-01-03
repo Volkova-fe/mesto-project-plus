@@ -1,14 +1,8 @@
-import { Response, NextFunction, Request } from 'express';
+import { Request } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
 
 export interface IAppRequest extends Request {
   user?: {
-    _id: String,
+    _id: String | JwtPayload,
   };
 }
-
-export const requestIdHandler = (req: IAppRequest, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '63b24b4b89048d067a728b4c',
-  };
-  next();
-};

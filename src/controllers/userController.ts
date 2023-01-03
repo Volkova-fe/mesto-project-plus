@@ -1,17 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import ApiError from '../error/ApiError';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { IAppRequest } from '../types/AppRequest';
 
 class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
-    const { name, about, avatar } = req.body;
+    const {
+      name = 'Жак-Ив Кусто',
+      about = 'Исследователь',
+      avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+      email,
+      password
+    } = req.body;
 
     try {
-      if (!name || !about || !avatar) {
+      if (!email || !password) {
         return next(ApiError.badRequest('Переданы некорректные данные при создании пользователя'));
       }
-      const user = await User.create({ name, about, avatar });
-      return res.json({ data: user });
+      const candidate = await User.findOne({ email });
+      if (candidate) {
+        return next(ApiError.badRequest('Пользователь с переданным email уже существует'))
+      }
+      const hashPassword = await bcrypt.hash(password, 10)
+      const user = await User.create({ name, about, avatar, email, password: hashPassword });
+      return res.json({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      });
     } catch {
       next(ApiError.internal('На сервере произошла ошибка'));
     }
@@ -37,6 +57,27 @@ class UserController {
     } catch {
       next(ApiError.internal('На сервере произошла ошибка'));
     }
+  }
+
+  async getUserInfo(req: IAppRequest, res: Response, next: NextFunction) {
+    const id = req.user?._id;
+    try {
+      const user = await User.findById(id);
+      if (!user) {
+        return next(ApiError.authorization('Пользователь по указанному _id не найден'));
+      }
+      res.send({ data: user });
+    } catch {
+      next(ApiError.internal('На сервере произошла ошибка'));
+    }
+  }
+
+  async login(req: IAppRequest, res: Response, _next: NextFunction) {
+    const { email, password } = req.body
+    const user = await User.findUserByCredentials(email, password);
+    return res.send({
+      token: jwt.sign({ _id: user._id }, process.env.SECRET_KEY as string, { expiresIn: '7d' }),
+    });
   }
 
   async updateInfo(req: any, res: Response, next: NextFunction) {

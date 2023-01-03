@@ -1,6 +1,8 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema, Model, Document, Types } from 'mongoose';
 import { regExp } from '../constants/index';
 import validator from 'validator';
+import ApiError from '../error/ApiError';
+import bcrypt from 'bcrypt';
 
 interface IUser {
   name: string;
@@ -8,6 +10,10 @@ interface IUser {
   avatar: string;
   email: string;
   password: string;
+}
+
+interface UserModel extends Model<IUser> {
+  findUserByCredentials: (email: string, password: string) => Promise<Document<any, any, IUser>>
 }
 
 const UserSchema = new Schema<IUser>({
@@ -48,6 +54,20 @@ const UserSchema = new Schema<IUser>({
   password: {
     type: String,
     required: [true, 'User password required'],
+    select: false
   },
 });
-export default model<IUser>('User', UserSchema);
+
+UserSchema.static('findUserByCredentials', async function findUserByCredentials (email, password) {
+  const user = await this.findOne({ email }).select('+password');
+  if (!user) {
+    return ApiError.authorization('Неправильные почта или пароль');
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return ApiError.authorization('Неправильные почта или пароль')
+  }
+  return user;
+});
+
+export default model<IUser, UserModel>('User', UserSchema);
