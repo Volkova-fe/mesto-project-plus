@@ -21,13 +21,21 @@ class UserController {
       }
       const candidate = await User.findOne({ email });
       if (candidate) {
-        return next(ApiError.badRequest('Пользователь с переданным email уже существует'));
+        return next(ApiError.conflict('Пользователь с переданным email уже существует'));
       }
       const hashPassword = await bcrypt.hash(password, 10);
       const user = await User.create({
         name, about, avatar, email, password: hashPassword,
       });
-      return res.send({ data: user });
+      return res.send({
+        data:
+        {
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        },
+      });
     } catch {
       next(ApiError.internal('На сервере произошла ошибка'));
     }
@@ -73,7 +81,7 @@ class UserController {
     try {
       const user = await User.findUserByCredentials(email, password);
       return res.send({
-        token: jwt.sign({ _id: user._id }, process.env.SECRET_KEY as string, { expiresIn: '7d' }),
+        token: jwt.sign({ _id: user._id }, process.env.SECRET_KEY as string || 'G0OSxv4FFzqX1O1KbkFaWmVVTW4kbWyI', { expiresIn: '7d' }),
       });
     } catch {
       next(ApiError.internal('На сервере произошла ошибка'));
