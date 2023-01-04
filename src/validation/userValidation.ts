@@ -13,7 +13,7 @@ export const createUserValidation = celebrate({
 
 export const getUserByIdValidation = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().length(24).required(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 });
 
@@ -33,6 +33,6 @@ export const updateInfoValidation = celebrate({
 
 export const updateAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(regExp),
+    avatar: Joi.string().pattern(regExp).required(),
   }),
 });

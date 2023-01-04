@@ -19,7 +19,7 @@ export default (req: IAuthRequest, _res: Response, next: NextFunction) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, process.env.SECRET_KEY as string);
+    payload = jwt.verify(token, process.env.SECRET_KEY as string || 'G0OSxv4FFzqX1O1KbkFaWmVVTW4kbWyI');
   } catch (err) {
     return ApiError.authorization('Необходима авторизация');
   }

@@ -13,6 +13,7 @@ import { errorLogger } from './middleware/errorLogger';
 require('dotenv').config();
 
 const PORT = process.env.PORT || 5003;
+const DBURL = process.env.DB_URL || 'mongodb://localhost:27017/mestodb';
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,7 @@ app.use(errorHandler);
 
 const start = async () => {
   try {
-    await mongoose.connect(`${process.env.DB_URL}`);
+    await mongoose.connect(`${DBURL}`);
 
     app.listen(
       PORT,
